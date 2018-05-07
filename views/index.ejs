@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" const="text/html;charset=UTF-8" />
+    <link href="http://fonts.googleapis.com/css?family=Comfortaa" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" type="text/css" href="style.css" >
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+  </head>
+
+  <body>
+
+    <section id="chatroom" class="module">
+      <div class="splitl">
+<h1>Welcome</h1>
+<div class="tab">
+  <button id="b1">Deekshitha</button>
+  <button >Mahathi</button>
+  <button >Vikram</button>
+</div>
+  </div>
+<div class="splitr">
+  <div class="chat">
+  <header class="top-bar">
+    
+    <div class="left">
+      <span class="icon typicons-message"></span>
+
+      <h1 id="t">Chat </h1>
+   <time > <p id="s"></p></time>
+
+    </div>
+       
+  </header>
+  
+  <ol class="discussion">
+    <li class="other">
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+      <div class="messages message" id="txt">
+    
+      </div>
+    </li>
+   
+    
+  </ol>
+<div id="input_zone" class="bot"> 
+      <input id="message" type="text" />
+      <button id="send_message" type="button">Send</button>
+    </div>
+  </div>
+
+</div>
+
+   </section>
+
+    
+
+    
+
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="chat.js"></script>
+  </body>
+</html>
