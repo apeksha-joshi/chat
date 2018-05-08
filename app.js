@@ -1,6 +1,12 @@
-const express = require('express')
-const app = express()
-//var lg =  $("#log")
+const express = require('express');
+const bodyParser = require('body-parser');
+const app = express();
+
+//support parsing of application/json type post data
+app.use(bodyParser.json());
+
+//support parsing of application/x-www-form-urlencoded post data
+app.use(bodyParser.urlencoded({ extended: true }));
 
 //set the template engine ejs
 app.set('view engine', 'ejs')
@@ -12,7 +18,24 @@ app.use(express.static('public'))
 //routes
 app.get('/', (req, res) => {
 	res.render('login')
-})
+});
+
+
+app.post('/login',(req,res)=>{
+    console.log(req.body);
+    let uname = req.body.username;
+    let pass = req.body.password;
+    if(uname === "apeksha" && pass === "joshi"){
+        res.redirect('dashboard');
+    }else{
+        res.redirect('/');
+    }
+});
+
+app.get('/dashboard',(req,res)=>{
+    // res.json({status:true})
+    res.render('index');
+});
 
 
 //Listen on port 3000
