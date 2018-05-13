@@ -1,6 +1,41 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+//const mongoose = require('mongoose');
+
+
+//connect to db
+mongoose.connect('mongodb://localhost/chat');
+var db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'connection error:'));
+db.once('open', function () {
+  console.log("db connected");
+});
+
+
+var UserSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true
+  },
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true,
+  }
+});
+
+
 
 //support parsing of application/json type post data
 app.use(bodyParser.json());
@@ -21,16 +56,131 @@ app.get('/', (req, res) => {
 });
 
 
-app.post('/login',(req,res)=>{
-    console.log(req.body);
-    let uname = req.body.username;
-    let pass = req.body.password;
-    if(uname === "apeksha" && pass === "joshi"){
-        res.redirect('dashboard');
-    }else{
-        res.redirect('/');
+//validate input-method authenticate
+UserSchema.statics.authenticate = function (email, password, callback) {
+  User.findOne({ email: email })
+    .exec(function (err, user) {
+      if (err) {
+        return callback(err)
+      } else if (!user) {
+        var err = new Error('User not found.');
+        err.status = 401;
+        return callback(err);
+      }
+      bcrypt.compare(password, user.password, function (err, result) {
+        if (result === true) {
+          return callback(null, user);
+        } else {
+          return callback();
+        }
+      })
+    });
+}
+
+//hashing a password before saving it to the database
+UserSchema.pre('save', function (next) {
+  var user = this;
+  bcrypt.hash(user.password, 10, function (err, hash) {
+    if (err) {
+      return next(err);
     }
+    user.password = hash;
+    next();
+  })
 });
+
+var User = mongoose.model('User', UserSchema);
+
+//run this- save this na 
+
+//Register the user
+app.post('/register', function (req, res) {
+	console.log("inside the register toute");s
+	let username = req.body.username;
+	let password = req.body.password;
+	let email = req.body.email;
+	let confPass = req.body.passwordConf;
+	if(confPass === password){
+		let user = new User({
+			username : username,
+			email:email,
+			password:password
+		});
+		user.save((error)=>{
+			console.log("saved user");
+			if(error){
+			console.log(error);
+			}
+		});
+	}else{
+		res.json({status:false,errMsg:"confirm passwaord is not as same as password"});
+	}
+});
+
+
+//POST route for updating data
+app.post('/login', function (req, res) {
+  // confirm that user typed same password twice
+  if (req.body.password !== req.body.passwordConf) {
+    var err = new Error('Passwords do not match.');
+    err.status = 400;
+    res.send("passwords dont match");
+    //return next(err);
+  }
+
+if (req.body.email &&
+    req.body.username &&
+    req.body.password &&
+    req.body.passwordConf) {
+
+    var userData = {
+      username: req.body.username,
+      email: req.body.email,
+      password: req.body.password,
+      passwordConf: req.body.passwordConf,
+    }
+
+    User.create(userData, function (error, user) {
+      if (error) {
+        return error;
+      } else {
+      
+       console.log("Data added");
+       return res.redirect('/');
+      }
+    });
+
+  } else if (req.body.logemail && req.body.logpassword) {
+    User.authenticate(req.body.logemail, req.body.logpassword, function (error, user) {
+      if (error || !user) {
+        var err = new Error('Wrong email or password.');
+        err.status = 401;
+        res.send(err);
+      } else {
+        
+        return res.redirect('dashboard');
+      }
+    });
+  } else {
+    var err = new Error('All fields required.');
+    err.status = 400;
+    res.send(err);
+  }
+
+
+});
+// app.post('/login',(req,res)=>{
+//     console.log(req.body);
+//     let uname = req.body.username;
+//     let pass = req.body.password;
+//     if(uname === "apeksha" && pass === "joshi"){
+//         console.log("success login");
+//         res.redirect('dashboard');
+//     }else{
+//         console.log("not success login");
+//         res.redirect('/');
+//     }
+// });
 
 app.get('/dashboard',(req,res)=>{
     // res.json({status:true})
@@ -40,7 +190,7 @@ app.get('/dashboard',(req,res)=>{
 
 //Listen on port 3000
 server = app.listen(3000,()=>{
-console.log('listening on- localhost:3000')
+console.log('listening on- localhost:3000s')
 })
 const io = require("socket.io")(server)
 
