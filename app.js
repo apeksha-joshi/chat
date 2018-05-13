@@ -49,7 +49,19 @@ app.set('view engine', 'ejs')
 //middlewares
 app.use(express.static('public'))
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Credentials', true);
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-Response-Time, X-PINGOTHER, X-CSRF-Token, Authorization, Page');
+    res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader('Access-Control-Expose-Headers', 'X-Api-Version, X-Request-Id, X-Response-Time');
+    res.setHeader('Access-Control-Max-Age', '1000');
 
+    next();
+};
+
+
+app.use(allowCrossDomain);
 //routes
 app.get('/', (req, res) => {
 	res.render('login')
@@ -95,7 +107,7 @@ var User = mongoose.model('User', UserSchema);
 
 //Register the user
 app.post('/register', function (req, res) {
-	console.log("inside the register toute");s
+	console.log("inside the register toute",req.body);
 	let username = req.body.username;
 	let password = req.body.password;
 	let email = req.body.email;
@@ -108,6 +120,7 @@ app.post('/register', function (req, res) {
 		});
 		user.save((error)=>{
 			console.log("saved user");
+			res.json({status:true,msg:"user saved"});
 			if(error){
 			console.log(error);
 			}
@@ -119,14 +132,14 @@ app.post('/register', function (req, res) {
 
 
 //POST route for updating data
-app.post('/login', function (req, res) {
+/*app.post('/login', function (req, res) {
   // confirm that user typed same password twice
-  if (req.body.password !== req.body.passwordConf) {
+ /!* if (req.body.password !== req.body.passwordConf) {
     var err = new Error('Passwords do not match.');
     err.status = 400;
     res.send("passwords dont match");
     //return next(err);
-  }
+  }*!/
 
 if (req.body.email &&
     req.body.username &&
@@ -168,19 +181,25 @@ if (req.body.email &&
   }
 
 
+});*/
+
+
+app.post('/login',(req,res)=>{
+    console.log(req.body);
+    let uname = req.body.username;
+    let pass = req.body.password;
+    User.find({username:uname},(error,docs)=>{
+        //assuming username is unique and only returns 1 document
+        console.log("the docs are 0",docs[0]);
+        bcrypt.compare(pass, docs[0].password, function (err, result) {
+            if (result === true) {
+                res.json({status:true});
+            } else {
+                res.json({status:false,msg:"wrong creds"});
+            }
+        })
+    });
 });
-// app.post('/login',(req,res)=>{
-//     console.log(req.body);
-//     let uname = req.body.username;
-//     let pass = req.body.password;
-//     if(uname === "apeksha" && pass === "joshi"){
-//         console.log("success login");
-//         res.redirect('dashboard');
-//     }else{
-//         console.log("not success login");
-//         res.redirect('/');
-//     }
-// });
 
 app.get('/dashboard',(req,res)=>{
     // res.json({status:true})

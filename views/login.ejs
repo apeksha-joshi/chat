@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
 </head>
 <body>
+
 <div class="wel">
     <div class="al">
         <h2 >Welcome to Chat room</h2>
@@ -22,7 +23,7 @@
 
 <div id="id01" class="modal">
 
-    <form class="modal-content animate" action="/login" name="login" id="login" method="POST">
+    <div class="modal-content animate" >
         <div class="imgcontainer">
             <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
 
@@ -30,12 +31,12 @@
 
         <div class="container">
             <label for="uname"><b>Username</b></label>
-            <input type="text" placeholder="Enter Username" name="logemail" required>
+            <input id="unameL" type="text" placeholder="Enter Username" name="logemail" required>
 
             <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="logpassword" required>
+            <input id="passL" type="password" placeholder="Enter Password" name="logpassword" required>
 
-            <button type="submit" id="log">Login</button>
+            <button onclick="doLogin()" id="log">Login</button>
            <!-- <input type="submit" id="log">Login</input>-->
 
         </div>
@@ -44,36 +45,71 @@
             <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
 
         </div>
-    </form>
+    </div>
 </div>
 <div id="id02" class="modal">
     <span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
-    <form class="modal-content" method="POST" action="/register">
+    <div class="modal-content">
         <div class="container">
             <h1>Sign Up</h1>
             <p>Please fill in this form to create an account.</p>
             <hr>
 
             <label for="name"><b>Name</b></label>
-            <input type="text" placeholder="Enter Name" name="username" required>
+            <input id="uname" type="text" placeholder="Enter Name" name="username" required>
 
             <label for="email"><b>Email</b></label>
-            <input type="text" placeholder="Enter Email" name="email" required>
+            <input id="email" type="text" placeholder="Enter Email" name="email" required>
 
             <label for="psw"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="password" required>
+            <input id="pass" type="password" placeholder="Enter Password" name="password" required>
 
             <label for="psw-repeat"><b>Repeat Password</b></label>
-            <input type="password" placeholder="Repeat Password" name="passwordConf" required>
+            <input id="passwordConf" type="password" placeholder="Repeat Password" name="passwordConf" required>
 
             <div class="clearfix">
                 <button type="button" onclick="document.getElementById('id02').style.display='none'" class="cancelbtn">Cancel</button>
-                <button type="submit" class="signupbtn">Sign Up</button>
+                <button class="signupbtn" onclick="submitForm()">Sign Up</button>
             </div>
         </div>
-    </form>
+    </div>
 </div>
 <script>
+function submitForm(){
+    console.log("clicked submit")
+    let obj={
+        username : document.getElementById("uname").value,
+        password :document.getElementById("pass").value,
+        email : document.getElementById("email").value,
+        passwordConf: document.getElementById("passwordConf").value
+    }
+    $.post( "/register",obj, function( data ) {
+        console.log("data is ",data);
+        if(data.status){
+            document.getElementById('id02').style.display='none';
+            alert("user saved !");
+        }else{
+            alert("server cashed try after sometime");
+        }
+    });
+}
+
+function doLogin(){
+    console.log("clicked submit")
+    let obj={
+        username : document.getElementById("unameL").value,
+        password :document.getElementById("passL").value,
+    }
+    $.post( "/login",obj, function( data ) {
+        console.log("data is ",data);
+        if(data.status){
+            document.getElementById('id01').style.display='none';
+            window.location = "http://localhost:3000/dashboard"
+        }else{
+            alert(data.msg);
+        }
+    });
+}
 
 </script>
 
